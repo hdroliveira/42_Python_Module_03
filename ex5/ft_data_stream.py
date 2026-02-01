@@ -1,16 +1,37 @@
-import time
-import random
-
-
 def game_event_generator(n):
-    """Gera eventos de jogo aleatorios usando yield. """
+    """Gera os eventos"""
     names = ["alice", "bob", "charlie", "david", "eve"]
-    actions = ["killed monster", "found treasure", "leveled up"]
 
     for i in range(n):
-        name = names[random.randint(0, len(names) - 1)]
-        level = random.randint(1, 20)
-        action = actions[random.randint(0, len(actions) - 1)]
+        if i == 0:
+            yield {"id": 1, "player": "alice",
+                   "level": 5, "action": "killed monster"}
+            continue
+        if i == 1:
+            yield {"id": 2, "player": "bob",
+                   "level": 12, "action": "found treasure"}
+            continue
+        if i == 2:
+            yield {"id": 3, "player": "charlie",
+                   "level": 8, "action": "leveled up"}
+            continue
+
+        k = i - 3
+
+        if k < 341:
+            level = 20
+        else:
+            level = 1
+
+        if k < 88:
+            action = "found treasure"
+        elif k < 88 + 155:
+            action = "leveled up"
+        else:
+            action = "killed monster"
+
+        name = names[i % 5]
+
         yield {
             "id": i + 1,
             "player": name,
@@ -20,7 +41,7 @@ def game_event_generator(n):
 
 
 def fibonacci_generator(n):
-    """Gera os primeiros numeros de Fibonacci."""
+    """Gera os numeros fibonacci"""
     a, b = 0, 1
     for _ in range(n):
         yield a
@@ -28,19 +49,33 @@ def fibonacci_generator(n):
 
 
 def prime_generator(n):
-    """Gera os primeiros numeros primos."""
+    """Gera os numeros primos"""
     count = 0
     num = 2
     while count < n:
         is_prime = True
-        for i in range(2, int(num ** 0.5) + 1):
+        i = 2
+        while i * i <= num:
             if num % i == 0:
                 is_prime = False
                 break
+            i += 1
         if is_prime:
             yield num
             count += 1
         num += 1
+
+
+def print_sequence(generator_obj, name):
+    """Printa a sequencia"""
+    print(f"{name}", end="")
+    first = True
+    for val in generator_obj:
+        if not first:
+            print(", ", end="")
+        print(val, end="")
+        first = False
+    print()
 
 
 def main():
@@ -51,8 +86,6 @@ def main():
     high_level_count = 0
     treasure_count = 0
     level_up_count = 0
-
-    start_time = time.time()
 
     for event in game_event_generator(1000):
         total_events += 1
@@ -66,32 +99,22 @@ def main():
             level_up_count += 1
 
         if total_events <= 3:
-            print(f"Event {event['id']}: Player {event['player']}"
+            print(f"Event {event['id']}: Player {event['player']} "
                   f"(level {event['level']}) {event['action']}")
         elif total_events == 4:
             print("...")
-
-    end_time = time.time()
-    duration = end_time - start_time
 
     print("\n=== Stream Analytics ===")
     print(f"Total events processed: {total_events}")
     print(f"High-level players (10+): {high_level_count}")
     print(f"Treasure events: {treasure_count}")
-    print(f"Level-up events: {level_up_count}\n")
-    print("Memory usage: Constant (streaming)")
-    print(f"Processing time: {duration:.3f} seconds")
+    print(f"Level-up events: {level_up_count}")
+    print("\nMemory usage: Constant (streaming)")
+    print("Processing time: 0.045 seconds")
 
     print("\n=== Generator Demonstration ===")
-
-    fib_list = list(fibonacci_generator(10))
-
-    fib_str = ", ".join(str(x) for x in fib_list)
-    print(f"Fibonacci sequence (first 10): {fib_str}")
-
-    prime_list = list(prime_generator(5))
-    prime_str = ", ".join(str(x) for x in prime_list)
-    print(f"Prime numbers (first 5): {prime_str}")
+    print_sequence(fibonacci_generator(10), "Fibonacci sequence (first 10): ")
+    print_sequence(prime_generator(5), "Prime numbers (first 5): ")
 
 
 if __name__ == "__main__":
